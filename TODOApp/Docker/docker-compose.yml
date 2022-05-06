@@ -1,0 +1,35 @@
+version: "3"
+services:
+
+  postgres:
+    restart: unless-stopped
+    image: ${POSTGRES_VERSION}
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      LOCALE: RU.UTF8
+      PGDATA: "/var/lib/postgresql/data/pgdata"
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  app:
+    build:
+      context: ../../
+      dockerfile: TODOApp/Docker/Dockerfile
+    tty: true
+    depends_on:
+      - postgres
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - ${EXTERNAL_SEVER_PORT}
+    volumes:
+      - temp-keys:/root/.aspnet/DataProtection-Keys\
+
+volumes:
+     pgdata:
+     temp-keys:
