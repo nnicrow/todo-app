@@ -6,6 +6,7 @@ using TODOApp.Auth;
 using TODOApp.DataAccess;
 using TODOApp.GraphQL;
 
+const string myAllowSpecificOrigins = "_myAllowSpecificOrigins";
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContextFactory<TodoappContext>(options =>
@@ -20,7 +21,16 @@ builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(@
         EncryptionAlgorithm = EncryptionAlgorithm.AES_256_CBC,
         ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
     });
-
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+        policy  =>
+        {
+            policy.WithOrigins("http://localhost:8080/")
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        });
+});
 
 var app = builder.Build();
 
@@ -28,9 +38,10 @@ app.UseRouting();
 app.UseAuthentication(); 
 app.UseAuthorization();
 app.UseHttpsRedirection();
-
+app.UseCors(myAllowSpecificOrigins);
 app.UseEndpoints(endpoints =>
     {
-        endpoints.MapGraphQL();
+        endpoints.MapGraphQL()
+            .RequireCors(myAllowSpecificOrigins);
     });
 app.Run();
