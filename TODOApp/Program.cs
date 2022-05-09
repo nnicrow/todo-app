@@ -23,13 +23,14 @@ builder.Services.AddDataProtection().PersistKeysToFileSystem(new DirectoryInfo(@
     });
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy(name: myAllowSpecificOrigins,
-        policy  =>
+    options.AddPolicy(myAllowSpecificOrigins,
+        corsPolicyBuilder =>
         {
-            policy.WithOrigins("http://localhost:8080/",
-                    "http://host.docker.internal:8080/")
+            corsPolicyBuilder
+                .AllowAnyOrigin() 
+                .AllowAnyMethod()
                 .AllowAnyHeader()
-                .AllowAnyMethod();
+                .AllowCredentials();
         });
 });
 
@@ -40,9 +41,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.UseHttpsRedirection();
 app.UseCors(myAllowSpecificOrigins);
+app.UseCors(corsPolicyBuilder => corsPolicyBuilder.AllowAnyOrigin());
 app.UseEndpoints(endpoints =>
-    {
-        endpoints.MapGraphQL()
-            .RequireCors(myAllowSpecificOrigins);
-    });
+{
+    endpoints.MapGraphQL()
+        .RequireCors(myAllowSpecificOrigins);;
+});
 app.Run();
