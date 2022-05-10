@@ -31,6 +31,26 @@ public class Mutation
         await todoappContext.SaveChangesAsync();
         return todoTask;
     }
+    
+    public async Task<IQueryable<TODOTask>?> AddTodoTaskList(IEnumerable<TodoTaskInput> todoTaskInput,
+        TodoappContext todoappContext, ClaimsPrincipal claimsPrincipal)
+    {
+        var user = GetUser.ByClaimsPrincipal(todoappContext, claimsPrincipal);
+        if (user == null) return null;
+        foreach (var todoTask in todoTaskInput.Select(taskInput => new TODOTask
+                 {
+                     Title = taskInput.Title,
+                     Description = taskInput.Description,
+                     CreatedOn = DateTime.UtcNow,
+                     LeadTime = taskInput.LeadTime,
+                     Owmer = user
+                 }))
+        {
+            await todoappContext.TodoTasks!.AddAsync(todoTask);
+            await todoappContext.SaveChangesAsync();
+        }
+        return todoappContext.TodoTasks?.Where(task => task.Owmer == user);
+    }
 
     [UseDbContext(typeof(TodoappContext))]
     public async Task<bool?> DeleteTodoTask(TodoTaskId todoTaskId, 
