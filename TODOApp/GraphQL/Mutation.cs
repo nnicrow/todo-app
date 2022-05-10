@@ -47,6 +47,24 @@ public class Mutation
         return true;
 
     }
+    
+    [UseDbContext(typeof(TodoappContext))]
+    public async Task<bool?> DeleteTodoTaskList(DeleteTaskList deleteTaskList, 
+        TodoappContext todoappContext, ClaimsPrincipal claimsPrincipal)
+    {
+        var user = GetUser.ByClaimsPrincipal(todoappContext, claimsPrincipal);
+        if (user == null) return null;
+        
+        if (todoappContext.TodoTasks == null) return false;
+        foreach (var todoTask in deleteTaskList.ID.Select(id => todoappContext.TodoTasks
+                     .FirstOrDefault(task => task.ID == id && task.Owmer == user)))
+        {
+            todoappContext.Remove(todoTask);
+        }
+        await todoappContext.SaveChangesAsync();
+        return true;
+
+    }
 
     [UseDbContext(typeof(TodoappContext))]
     public async Task<TODOTask?> ToggleIsCompleteTaskById(TodoTaskId todoTaskId,
