@@ -63,7 +63,22 @@ public class Mutation
         }
         await todoappContext.SaveChangesAsync();
         return true;
-
+    }
+    
+    [UseDbContext(typeof(TodoappContext))]
+    public async Task<bool?> DeleteAllTodoTask(
+        TodoappContext todoappContext, ClaimsPrincipal claimsPrincipal)
+    {
+        var user = GetUser.ByClaimsPrincipal(todoappContext, claimsPrincipal);
+        if (user == null) return null;
+        
+        if (todoappContext.TodoTasks == null) return false;
+        foreach (var todoTask in todoappContext.TodoTasks?.Where(task => task.Owmer == user)!)
+        {
+            todoappContext.Remove(todoTask);
+        }
+        await todoappContext.SaveChangesAsync();
+        return true;
     }
 
     [UseDbContext(typeof(TodoappContext))]
