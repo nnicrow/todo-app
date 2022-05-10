@@ -24,6 +24,7 @@ public class Mutation
             Title = todoTaskInput.Title,
             Description = todoTaskInput.Description,
             CreatedOn = DateTime.UtcNow,
+            LeadTime = todoTaskInput.LeadTime,
             Owmer = user
         };
         await todoappContext.TodoTasks!.AddAsync(todoTask);
@@ -72,7 +73,8 @@ public class Mutation
         var todoTask = todoappContext.TodoTasks?.FirstOrDefault(task => task.ID == todoTaskId.ID && task.Owmer == user);
         if (todoTask == null) return null;
         todoTask.Title = todoTaskInput.Title;
-        todoTask.Description = todoTaskInput.Description; 
+        todoTask.Description = todoTaskInput.Description;
+        todoTask.LeadTime = todoTaskInput.LeadTime;
         todoappContext.TodoTasks?.Update(todoTask);
         await todoappContext.SaveChangesAsync();
         return todoTask;
